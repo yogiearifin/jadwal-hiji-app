@@ -4,7 +4,14 @@ import { ICustomer, IRanks } from "@/interface/customer";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { SelectList } from "react-native-select-bottom-list";
 
 const CustomerDetail = () => {
@@ -14,7 +21,6 @@ const CustomerDetail = () => {
   const [ranks, setRanks] = useState<IRanks[]>([]);
   const [selectedRank, setSelectedRank] =
     useState<Omit<IRanks, "id" | "created_at">>();
-  console.log("select", selectedRank);
   const getUserDetail = useCallback(async () => {
     navigation.setOptions({
       title: "Loading...",
@@ -62,12 +68,12 @@ const CustomerDetail = () => {
     getPlayerRank();
   }, [getPlayerRank]);
   return (
-    <View>
+    <ScrollView>
       {detail && (
         <View style={styles.container}>
           {detail.is_top_spender && (
             <Text style={styles.topSpender}>
-              $ This customer is one of the top spender in their region
+              ⭐ This customer is one of the top spender in their region.
             </Text>
           )}
           {detail.has_low_product_affinity && (
@@ -83,10 +89,22 @@ const CustomerDetail = () => {
               height: 200,
             }}
           />
-          <View>
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              gap: 4,
+              paddingVertical: 8,
+            }}
+          >
             <Text>Name: {detail.name}</Text>
             <Text>Region: {detail.region}</Text>
-            <Text>Base Budget: {detail.base_budget}</Text>
+            <Text>
+              Base Budget:{" "}
+              <Text style={detail.is_top_spender ? styles.topSpender : {}}>
+                {detail.base_budget}
+              </Text>
+            </Text>
             <Text>
               Favorite Product:{" "}
               <Text style={styles.product}>{detail.preferred_products}</Text>
@@ -114,20 +132,32 @@ const CustomerDetail = () => {
             </Text>
             {detail.trivia.length ? (
               <View style={{ paddingVertical: 4 }}>
-                <Text>Trivia</Text>
+                <Text style={{ fontWeight: 600 }}>Trivia:</Text>
                 <View>
                   {detail.trivia.map((item) => (
-                    <Text key={item}>-{item}</Text>
+                    <Text key={item}>•{item}</Text>
                   ))}
                 </View>
               </View>
             ) : null}
           </View>
           <View style={styles.calculateBudgetContainer}>
-            <Text>
+            <Text style={{ marginBottom: 8 }}>
               Calculate this customer&#39;s budget per deal by player ranks.
             </Text>
             <View>
+              {selectedRank?.rank && (
+                <Text style={{ marginVertical: 8 }}>
+                  Budget per deal:{" "}
+                  <Text style={{ fontWeight: 600 }}>
+                    {calculateBudgetByRank(
+                      detail.base_budget,
+                      selectedRank?.rank,
+                      detail.max_budget
+                    )}
+                  </Text>
+                </Text>
+              )}
               <SelectList
                 onSelect={(item, index) => {
                   setSelectedRank({
@@ -140,23 +170,11 @@ const CustomerDetail = () => {
                 headerTitle="Select Your Rank"
                 placeHolder="Select your rank"
               />
-              {selectedRank?.rank && (
-                <Text style={{ marginTop: 12 }}>
-                  Budget per deal:{" "}
-                  <Text style={{ fontWeight: 600 }}>
-                    {calculateBudgetByRank(
-                      detail.base_budget,
-                      selectedRank?.rank,
-                      detail.max_budget
-                    )}
-                  </Text>
-                </Text>
-              )}
             </View>
           </View>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
@@ -173,7 +191,6 @@ const styles = StyleSheet.create({
   topSpender: {
     fontWeight: 600,
     color: "green",
-    fontSize: 12,
     textAlign: "center",
   },
   hateProduct: {
@@ -183,8 +200,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   calculateBudgetContainer: {
-    marginTop: 12,
-    gap: 12,
+    marginVertical: 8,
   },
 });
 

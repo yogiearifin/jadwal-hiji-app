@@ -1,13 +1,15 @@
 import { BASE_URL } from "@/constant";
 import { determineProductQuality } from "@/helper";
 import { ICustomer } from "@/interface/customer";
-import { Link } from "expo-router";
+import { Link, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const [customers, setCustomers] = useState<ICustomer[]>([]);
+  const navigation = useNavigation<any>();
+
   const getListCustomers = async () => {
     try {
       const response = await fetch(`${BASE_URL}/customers`);
@@ -15,6 +17,10 @@ export default function Index() {
         throw new Error(`error: ${response.status}`);
       }
       const data = await response.json();
+      navigation.setOptions({
+        title: "The Benji's Network",
+        headerLeft: () => null,
+      });
       setCustomers(data);
     } catch (error: any) {
       console.error(error?.message);
@@ -30,27 +36,27 @@ export default function Index() {
         <View style={styles.container}>
           {customers &&
             customers?.map((item) => (
-              <View
+              <Link
                 key={item.id}
-                style={[
-                  styles.item,
-                  {
-                    backgroundColor:
-                      determineProductQuality(item.product_standard)?.color ??
-                      "gray",
-                  },
-                ]}
+                href={{
+                  pathname: "/customerdetail/[id]",
+                  params: { id: item.id },
+                }}
               >
-                <Link
-                  href={{
-                    pathname: "/customerdetail/[id]",
-                    params: { id: item.id },
-                  }}
+                <View
+                  style={[
+                    styles.item,
+                    {
+                      backgroundColor:
+                        determineProductQuality(item.product_standard)?.color ??
+                        "gray",
+                    },
+                  ]}
                 >
                   <Image source={{ uri: item.img_url }} style={styles.image} />
-                </Link>
-                <Text style={styles.name}>{item.name}</Text>
-              </View>
+                  <Text style={styles.name}>{item.name}</Text>
+                </View>
+              </Link>
             ))}
         </View>
       </ScrollView>
@@ -71,15 +77,21 @@ const styles = StyleSheet.create({
   },
   item: {
     width: 100,
+    height: 150,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
     borderRadius: 15,
-    padding: 8,
+    padding: 12,
   },
   image: {
     width: 75,
     height: 75,
   },
-  name: { textAlign: "center", fontWeight: 600, color: "white" },
+  name: {
+    textAlign: "center",
+    fontWeight: 600,
+    color: "white",
+    paddingVertical: 8,
+  },
 });

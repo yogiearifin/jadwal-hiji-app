@@ -5,6 +5,7 @@ export default function RootLayout() {
     <Stack
       screenOptions={{
         title: "The Benji's Network",
+        headerBackVisible: false,
       }}
     >
       <Stack.Screen name="customerdetail" />
