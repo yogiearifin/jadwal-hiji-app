@@ -2,9 +2,10 @@ import { BASE_URL } from "@/constant";
 import { calculateBudgetByRank, determineProductQuality } from "@/helper";
 import { ICustomer, IRanks } from "@/interface/customer";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   Pressable,
   ScrollView,
@@ -16,6 +17,7 @@ import { SelectList } from "react-native-select-bottom-list";
 
 const CustomerDetail = () => {
   const [detail, setDetail] = useState<ICustomer>();
+  const [loading, setLoading] = useState<boolean>(false);
   const navigation = useNavigation<any>();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [ranks, setRanks] = useState<IRanks[]>([]);
@@ -25,6 +27,7 @@ const CustomerDetail = () => {
     navigation.setOptions({
       title: "Loading...",
     });
+    setLoading(true);
     try {
       const response = await fetch(`${BASE_URL}/customers/${id}`);
       if (!response.ok) {
@@ -32,11 +35,14 @@ const CustomerDetail = () => {
       }
       const data = await response.json();
       setDetail(data);
+      setLoading(false);
       navigation.setOptions({
         title: data.name,
         headerLeft: () => (
           <Pressable
-            onPress={() => navigation.navigate("index")}
+            onPress={() =>
+              router.canGoBack() ? router.back() : navigation.navigate("index")
+            }
             style={{ marginLeft: 16 }}
           >
             <Ionicons name="arrow-back" size={24} />
@@ -45,6 +51,7 @@ const CustomerDetail = () => {
       });
     } catch (error) {
       console.error(error);
+      setLoading(false);
     }
   }, [id, navigation]);
   const getPlayerRank = useCallback(async () => {
@@ -69,110 +76,117 @@ const CustomerDetail = () => {
   }, [getPlayerRank]);
   return (
     <ScrollView>
-      {detail && (
-        <View style={styles.container}>
-          {detail.is_top_spender && (
-            <Text style={styles.topSpender}>
-              ⭐ This customer is one of the top spender in their region.
-            </Text>
-          )}
-          {detail.has_low_product_affinity && (
-            <Text style={styles.hateProduct}>
-              👎 This customer has low product affinity. {"\n"} They have a
-              lower chance to accept your free sample.
-            </Text>
-          )}
-          <Image
-            source={{ uri: detail.img_url }}
-            style={{
-              width: 200,
-              height: 200,
-            }}
-          />
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              gap: 4,
-              paddingVertical: 8,
-            }}
-          >
-            <Text>Name: {detail.name}</Text>
-            <Text>Region: {detail.region}</Text>
-            <Text>
-              Base Budget:{" "}
-              <Text style={detail.is_top_spender ? styles.topSpender : {}}>
-                {detail.base_budget}
+      {loading ? (
+        <ActivityIndicator
+          size="large"
+          style={{ flex: 1, marginVertical: 20 }}
+        />
+      ) : (
+        detail && (
+          <View style={styles.container}>
+            {detail.is_top_spender && (
+              <Text style={styles.topSpender}>
+                ⭐ This customer is one of the top spender in their region.
               </Text>
-            </Text>
-            <Text>
-              Favorite Product:{" "}
-              <Text style={styles.product}>{detail.preferred_products}</Text>
-            </Text>
-            <Text>
-              Hated Product:{" "}
-              <Text style={[styles.product, { color: "red" }]}>
-                {detail.hated_products}
+            )}
+            {detail.has_low_product_affinity && (
+              <Text style={styles.hateProduct}>
+                👎 This customer has low product affinity. {"\n"} They have a
+                lower chance to accept your free sample.
               </Text>
-            </Text>
-            <Text
+            )}
+            <Image
+              source={{ uri: detail.img_url }}
               style={{
-                textTransform: "capitalize",
+                width: 200,
+                height: 200,
+              }}
+            />
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+                gap: 4,
+                paddingVertical: 8,
               }}
             >
-              Standard:{" "}
+              <Text>Name: {detail.name}</Text>
+              <Text style={{ textTransform: "capitalize" }}>
+                Region: {detail.region}
+              </Text>
+              <Text>
+                Base Budget:{" "}
+                <Text style={detail.is_top_spender ? styles.topSpender : {}}>
+                  {detail.base_budget}
+                </Text>
+              </Text>
+              <Text>
+                Favorite Product:{" "}
+                <Text style={styles.product}>{detail.preferred_products}</Text>
+              </Text>
+              <Text>
+                Hated Product:{" "}
+                <Text style={[styles.product, { color: "red" }]}>
+                  {detail.hated_products}
+                </Text>
+              </Text>
               <Text
                 style={{
-                  color: determineProductQuality(detail.product_standard)
-                    ?.color,
+                  textTransform: "capitalize",
                 }}
               >
-                ★ {determineProductQuality(detail.product_standard)?.name}
+                Standard:{" "}
+                <Text
+                  style={{
+                    color: determineProductQuality(detail.product_standard)
+                      ?.color,
+                  }}
+                >
+                  ★ {determineProductQuality(detail.product_standard)?.name}
+                </Text>
               </Text>
-            </Text>
-            {detail.trivia.length ? (
-              <View style={{ paddingVertical: 4 }}>
-                <Text style={{ fontWeight: 600 }}>Trivia:</Text>
-                <View>
-                  {detail.trivia.map((item) => (
-                    <Text key={item}>•{item}</Text>
-                  ))}
-                </View>
-              </View>
-            ) : null}
-          </View>
-          <View style={styles.calculateBudgetContainer}>
-            <Text style={{ marginBottom: 8 }}>
-              Calculate this customer&#39;s budget per deal by player ranks.
-            </Text>
-            <View>
               {selectedRank?.rank && (
-                <Text style={{ marginVertical: 8 }}>
+                <Text style={{ fontWeight: 600 }}>
                   Budget per deal:{" "}
-                  <Text style={{ fontWeight: 600 }}>
-                    {calculateBudgetByRank(
-                      detail.base_budget,
-                      selectedRank?.rank,
-                      detail.max_budget
-                    )}
-                  </Text>
+                  {calculateBudgetByRank(
+                    detail.base_budget,
+                    selectedRank?.rank,
+                    detail.max_budget
+                  )}
                 </Text>
               )}
-              <SelectList
-                onSelect={(item, index) => {
-                  setSelectedRank({
-                    rank_name: item,
-                    rank: typeof index === "number" ? index + 1 : 0,
-                  });
-                }}
-                value={selectedRank?.rank_name ?? ""}
-                data={ranks?.map((item) => item.rank_name)}
-                headerTitle="Select Your Rank"
-                placeHolder="Select your rank"
-              />
+              {detail.trivia.length ? (
+                <View style={{ paddingVertical: 4 }}>
+                  <Text style={{ fontWeight: 600 }}>Trivia:</Text>
+                  <View>
+                    {detail.trivia.map((item) => (
+                      <Text key={item}>•{item}</Text>
+                    ))}
+                  </View>
+                </View>
+              ) : null}
+            </View>
+            <View style={styles.calculateBudgetContainer}>
+              <Text style={{ marginBottom: 8 }}>
+                Calculate this customer&#39;s budget per deal by player ranks.
+              </Text>
+              <View>
+                <SelectList
+                  onSelect={(item, index) => {
+                    setSelectedRank({
+                      rank_name: item,
+                      rank: typeof index === "number" ? index + 1 : 0,
+                    });
+                  }}
+                  value={selectedRank?.rank_name ?? ""}
+                  data={ranks?.map((item) => item.rank_name)}
+                  headerTitle="Select Your Rank"
+                  placeHolder="Select your rank"
+                />
+              </View>
             </View>
           </View>
-        </View>
+        )
       )}
     </ScrollView>
   );

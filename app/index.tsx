@@ -1,65 +1,54 @@
-import { BASE_URL } from "@/constant";
-import { determineProductQuality } from "@/helper";
-import { ICustomer } from "@/interface/customer";
-import { Link, useNavigation } from "expo-router";
-import { useEffect, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Link } from "expo-router";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
-  const [customers, setCustomers] = useState<ICustomer[]>([]);
-  const navigation = useNavigation<any>();
-
-  const getListCustomers = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/customers`);
-      if (!response.ok) {
-        throw new Error(`error: ${response.status}`);
-      }
-      const data = await response.json();
-      navigation.setOptions({
-        title: "The Benji's Network",
-        headerLeft: () => null,
-      });
-      setCustomers(data);
-    } catch (error: any) {
-      console.error(error?.message);
-    }
-  };
-
-  useEffect(() => {
-    getListCustomers();
-  }, []);
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView>
+      <View>
         <View style={styles.container}>
-          {customers &&
-            customers?.map((item) => (
-              <Link
-                key={item.id}
-                href={{
-                  pathname: "/customerdetail/[id]",
-                  params: { id: item.id },
-                }}
-              >
-                <View
-                  style={[
-                    styles.item,
-                    {
-                      backgroundColor:
-                        determineProductQuality(item.product_standard)?.color ??
-                        "gray",
-                    },
-                  ]}
-                >
-                  <Image source={{ uri: item.img_url }} style={styles.image} />
-                  <Text style={styles.name}>{item.name}</Text>
-                </View>
-              </Link>
-            ))}
+          <Text style={styles.title}>Welcome to The Benji&apos;s Network</Text>
+          <Text style={styles.subtitle}>What do you need, Boss?</Text>
         </View>
-      </ScrollView>
+        <View style={styles.containerItem}>
+          <Link
+            href={{
+              pathname: "/regionList",
+            }}
+          >
+            <View style={styles.item}>
+              <Image
+                source={{
+                  uri: "https://static.wikia.nocookie.net/schedule-1/images/4/43/Region_Northtown.png",
+                }}
+                style={{
+                  width: 100,
+                  height: 100,
+                }}
+              />
+              <Text style={styles.title}>Region</Text>
+            </View>
+          </Link>
+          <Link
+            href={{
+              pathname: "/customerList",
+            }}
+          >
+            <View style={styles.item}>
+              <Image
+                source={{
+                  uri: "https://static.wikia.nocookie.net/schedule-1/images/f/fa/Jessi_Mugshot.png",
+                }}
+                style={{
+                  width: 100,
+                  height: 100,
+                }}
+              />
+              <Text style={styles.title}>Customer</Text>
+            </View>
+          </Link>
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -69,14 +58,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    flexDirection: "row",
+    flexDirection: "column",
     flexWrap: "wrap",
     justifyContent: "center",
+    alignContent: "center",
     gap: 12,
     padding: 12,
   },
   item: {
-    width: 100,
+    width: 150,
     height: 150,
     alignItems: "center",
     justifyContent: "center",
@@ -93,5 +83,22 @@ const styles = StyleSheet.create({
     fontWeight: 600,
     color: "white",
     paddingVertical: 8,
+  },
+  title: {
+    fontWeight: "600",
+    fontSize: 24,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontWeight: "600",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  containerItem: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 12,
+    padding: 12,
   },
 });

@@ -1,12 +1,6 @@
-export type ProductType = "weed" | "meth" | "coke";
-export type RegionType =
-  | "Northtown"
-  | "Westville"
-  | "Downtown"
-  | "Docks"
-  | "Suburbia"
-  | "Uptown";
+import { RegionType } from "./region";
 
+export type ProductType = "weed" | "meth" | "coke";
 export interface ICustomer {
   base_budget: number;
   created_at: string;

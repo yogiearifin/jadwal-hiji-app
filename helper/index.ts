@@ -37,3 +37,6 @@ export const calculateBudgetByRank = (
 
   return Math.round((maxBudget / 100) * multiplier);
 };
+
+export const capitalize = (text: string) =>
+  text.charAt(0).toUpperCase() + text.slice(1);
