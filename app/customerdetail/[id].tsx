@@ -160,7 +160,7 @@ const CustomerDetail = () => {
                   <Text style={{ fontWeight: 600 }}>Trivia:</Text>
                   <View>
                     {detail.trivia.map((item) => (
-                      <Text key={item}>•{item}</Text>
+                      <Text key={item}>• {item}</Text>
                     ))}
                   </View>
                 </View>

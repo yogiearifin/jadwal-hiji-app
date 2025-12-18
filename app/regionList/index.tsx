@@ -5,13 +5,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { Link, useNavigation } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -59,6 +59,14 @@ export default function Index() {
         />
       ) : (
         <ScrollView>
+          <View style={styles.textContainer}>
+            <Text style={styles.title}>
+              These are regions currently available, Boss.
+            </Text>
+            <Text style={styles.title}>
+              Click on a region to see its details.
+            </Text>
+          </View>
           <View style={styles.container}>
             {regions &&
               regions?.map((item) => (
@@ -124,5 +132,13 @@ const styles = StyleSheet.create({
     color: "white",
     paddingVertical: 8,
     textTransform: "capitalize",
+  },
+  textContainer: {
+    padding: 12,
+    gap: 4,
+    alignItems: "center",
+  },
+  title: {
+    fontWeight: 600,
   },
 });

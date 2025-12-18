@@ -129,9 +129,6 @@ const RegionDetail = () => {
                 paddingVertical: 8,
               }}
             >
-              <Text style={{ textTransform: "capitalize" }}>
-                Name: {detail.region_name}
-              </Text>
               <Text>Dealer: {detail.region_dealer}</Text>
               <Text>Supplier: {detail.region_supplier ?? "-"}</Text>
               <Text
@@ -151,7 +148,7 @@ const RegionDetail = () => {
               </Text>
             </View>
             <Text style={{ marginVertical: 8, fontWeight: 600 }}>
-              Player Rank
+              Determine budget per deal for this region
             </Text>
             <View>
               <SelectList
@@ -167,7 +164,7 @@ const RegionDetail = () => {
                 placeHolder="Select your rank"
               />
             </View>
-            <View style={styles.calculateBudgetContainer}>
+            <View style={styles.customerListContainer}>
               <Text
                 style={{
                   marginBottom: 8,
@@ -204,7 +201,7 @@ const RegionDetail = () => {
                             height: 100,
                           }}
                         />
-                        <Text>Name: {item.name}</Text>
+                        <Text style={{ fontWeight: 600 }}>{item.name}</Text>
                         <Text>Base Budget: {item.base_budget}</Text>
                         {selectedRank?.rank && (
                           <Text style={{ fontWeight: 600 }}>
@@ -234,22 +231,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 12,
   },
-  product: {
-    textTransform: "capitalize",
-    fontWeight: 600,
-  },
-  topSpender: {
-    fontWeight: 600,
-    color: "green",
-    textAlign: "center",
-  },
-  hateProduct: {
-    fontWeight: 600,
-    color: "red",
-    fontSize: 12,
-    textAlign: "center",
-  },
-  calculateBudgetContainer: {
+  customerListContainer: {
     marginVertical: 8,
   },
   item: {
